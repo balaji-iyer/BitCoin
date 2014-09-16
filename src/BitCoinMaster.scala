@@ -8,8 +8,11 @@ import akka.actor._
 import com.typesafe.config.ConfigFactory
 
 
+case class start(zeroes :Int)
 
-object Master{
+case class Greeting(message: String)
+
+object BitCoinMaster{
    def main(args: Array[String]): Unit = { 
   //Accept number of zeroes and ip address arguments from command line
   val zeroesExpected = args(0).toInt
@@ -19,20 +22,11 @@ object Master{
   val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/MiningActor"
 
   
-   system.actorOf(Master.props(remotePath, zeroesExpected, remoteHostPort, remotePath), "snd")
-
-//  if(remoteHostPort == "127.0.0.1:2552"){
-//  	 val local = context.actorSelection(remotePath)
-//  	 local ! Start(zeroesExpected)
-//  }
-//  else{
-//    val remote=context.actorSelection(remotePath)
-//  }
-    
+   system.actorOf(BitCoinMaster.props(remotePath, zeroesExpected, remoteHostPort), "snd")
    }
 
-  def props(path: String, zeroesExpected: Int, remoteHostPort: String, remotePath: String): Props =
-    Props(new BitCoinMaster(path, zeroesExpected, remoteHostPort, remotePath))
+  def props(path: String, zeroesExpected: Int, remoteHostPort: String): Props =
+    Props(new BitCoinMaster(path, zeroesExpected, remoteHostPort))
    
 }
   
@@ -51,56 +45,63 @@ object Master{
 		*/
 
 
-class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String, remotePath: String) extends Actor {
+class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String) extends Actor {
 
+   
   def receive={
-    case "START" =>
+    case "RECEIVE" =>
      		println("Hello from MiningActor")
   }
     //Create a actor system
-    val system = ActorSystem("MasterSystem")
-    //val testActor = system.actorOf(Props[MiningActor], name = "testActor1")
+    val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))    
     
-//  	if(remoteHostPort == "127.0.0.1:2552")
-//		{
-//			val processors = Runtime.getRuntime().availableProcessors()
-//			val MiningActor1 = system.actorOf(Props[MiningActor], name = "MiningActor1")
-//			
-//			
-//			
-//			MiningActor1 ! "START"
-//			
-//			
-//		}
-  
-    self !"START"
-    
+  	if(remoteHostPort == "127.0.0.1:2552")
+		{
+  	  /*
+			val processors = Runtime.getRuntime().availableProcessors()+4
+			
+			for(i<- 0 to processors){
+			  val actorName="MiningActor"+i.toString()
+			  var actor = system.actorOf(Props[MiningActor], name = actorName)
+			  actor! start(zeroesExpected)
+			  
+			}
+			*/
+  	  println("Trying just remote")
+		}
+  		else{
+  	       //val MiningActor1 = system.actorOf(Props[MiningActor], name = "MiningActor1")
+			val remote = system.actorSelection(path)
+			remote ! start(zeroesExpected)
+  		}
+			    
+    		//self! "RECEIVE"
 }
 
-class MiningActor(ip:String) extends Actor{
+class MiningActor extends Actor{
   //val remote = context.actorSelection("akka.tcp://MasterSystem@"+ip+":2552/user/RemoteMiningActor")
   var counter=0
   def receive ={
     case "START" =>
-      		sender ! "START"
+      		println("Abe hoja")
     case msg : String=>
       		println(s"LocalActor received message:'$msg'");
       		if(counter<5){
       			sender ! "Hello back to you"
       			counter += 1
       		}
-//    case start : Int =>
-//	    {
-//	      for(i<- 0 to 10000000)
-//	      {
-//	    	  var flag = true
-//	    	  val input = BearerTokenGenerator.getToken()
-//	    	  val hashOutput = BearerTokenGenerator.generateSHAToken(input)
-//	    	  if (Common.isBitCoin(hashOutput,z))
-//	    		  println("bitcoin:"+input+"\thash:"+ hashOutput)
-//	      }
-//	      
-//	    }		
+    case start(z) =>
+	    {
+	      for(i<- 0 to 10000000)
+	      {
+	    	  var flag = true
+	    	  val input = BearerTokenGenerator.getToken()
+	    	  val hashOutput = BearerTokenGenerator.generateSHAToken(input)
+	    	  if (Common.isBitCoin(hashOutput,z))
+	    		  println("bitcoin:"+input+"\thash:"+ hashOutput)
+	      }
+	      
+	    }		
   }
   
   
