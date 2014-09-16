@@ -78,8 +78,8 @@ class MBitCoin(path: String, zeroesExpected: Int, remoteHostPort:String) extends
 		//	remote ! "START"
   	  
   		println("Local")
-  		println("Trying just remote")
-  		println(path)
+//  		println("Trying just remote")
+//  		println(path)
 		//val remote = context.actorSelection(s"akka.tcp://MasterSystem@10.136.14.46:2552/user/Mining")
 		//remote ! "START"
   	  
@@ -123,15 +123,15 @@ class SBitCoin(path: String, zeroesExpected: Int, remoteHostPort:String) extends
   		
   		println("Trying just remote")
   		println(path)
-		val remote = context.actorSelection(s"akka.tcp://MasterSystem@10.136.14.46:2552/user/Mining")
+		val remote = context.actorSelection(s"akka.tcp://MasterSystem@10.136.14.46:2552/user/RemoteMiningActor")
 		remote ! "START"
   	  
 		}
-  		else{
-  		  println("Trying just remote")
-  		  println(path)
-		  val remote = context.actorSelection(path)
-		  remote ! "START"
+  	else{
+  		 println("Trying just remote")
+  		 println(path)
+		 val remote = context.actorSelection(path)
+		 remote ! "START"
   		}
 			    
     		//self! "RECEIVE"
@@ -163,8 +163,33 @@ class MiningActor extends Actor{
 	      
 	    }		
   }
+}
   
-  
+ class RemoteMiningActor extends Actor{
+  //val remote = context.actorSelection("akka.tcp://MasterSystem@"+ip+":2552/user/RemoteMiningActor")
+  var counter=0
+  def receive ={
+    case "START" =>
+      		println("Abe hoja")
+    case msg : String=>
+      		println(s"LocalActor received message:'$msg'");
+      		if(counter<5){
+      			sender ! "Hello back to you"
+      			counter += 1
+      		}
+    case start(z) =>
+	    {
+	      for(i<- 0 to 10000000)
+	      {
+	    	  var flag = true
+	    	  val input = BearerTokenGenerator.getToken()
+	    	  val hashOutput = BearerTokenGenerator.generateSHAToken(input)
+	    	  if (Common.isBitCoin(hashOutput,z))
+	    		  println("bitcoin:"+input+"\thash:"+ hashOutput)
+	      }
+	      
+	    }		
+  }
   
 }
 
