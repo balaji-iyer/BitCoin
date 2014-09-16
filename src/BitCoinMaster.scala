@@ -7,28 +7,19 @@ import BearerTokenGenerator._
 import akka.actor._
 import com.typesafe.config.ConfigFactory
 
-class BitCoinMaster(path: String, zeroesExpected: Int, remotePath: String) extends Actor {
 
-  def receive={
-    case "START" =>
-      		println("Hello from LocalActor")
-    
-  }
-     
-    //Create a actor system
-    //val system = ActorSystem("MasterSystem")
-    //val remoteActor = system.actorOf(Props[MiningActor], name = "RemoteActor1")
-    //remoteActor ! "The RemoteActor is alive"    
-}
 
 object Master{
    def main(args: Array[String]): Unit = { 
   //Accept number of zeroes and ip address arguments from command line
   val zeroesExpected = args(0).toInt
-  val remoteHostPort = if (args.length >= 1) args(1) else "127.0.0.1:2552"
+  val remoteHostPort = if (args.length >= 2) args(1) else "127.0.0.1:2552"
     
   val system = ActorSystem("MasterSystem", ConfigFactory.load("Master.conf"))    	
   val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/MiningActor"
+
+  
+   system.actorOf(Master.props(remotePath, zeroesExpected, remoteHostPort, remotePath), "snd")
 
 //  if(remoteHostPort == "127.0.0.1:2552"){
 //  	 val local = context.actorSelection(remotePath)
@@ -38,9 +29,12 @@ object Master{
 //    val remote=context.actorSelection(remotePath)
 //  }
     
-      system.actorOf(BitCoinMaster(remotePath, zeroesExpected, remotePath), "snd")
+   }
 
-      
+  def props(path: String, zeroesExpected: Int, remoteHostPort: String, remotePath: String): Props =
+    Props(new BitCoinMaster(path, zeroesExpected, remoteHostPort, remotePath))
+   
+}
   
   /*if(remoteHostPort == "127.0.0.1:2552")
 		{
@@ -56,66 +50,60 @@ object Master{
 		}
 		*/
 
+
+class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String, remotePath: String) extends Actor {
+
+  def receive={
+    case "START" =>
+     		println("Hello from MiningActor")
   }
+    //Create a actor system
+    val system = ActorSystem("MasterSystem")
+    //val testActor = system.actorOf(Props[MiningActor], name = "testActor1")
+    
+//  	if(remoteHostPort == "127.0.0.1:2552")
+//		{
+//			val processors = Runtime.getRuntime().availableProcessors()
+//			val MiningActor1 = system.actorOf(Props[MiningActor], name = "MiningActor1")
+//			
+//			
+//			
+//			MiningActor1 ! "START"
+//			
+//			
+//		}
   
+    self !"START"
+    
 }
 
-class MiningActor(ip: String) extends Actor{
-  val remote = context.actorSelection("akka.tcp://MasterSystem@"+ip+":2552/user/RemoteMiningActor")
+class MiningActor(ip:String) extends Actor{
+  //val remote = context.actorSelection("akka.tcp://MasterSystem@"+ip+":2552/user/RemoteMiningActor")
   var counter=0
   def receive ={
     case "START" =>
-      		remote ! "Hello from LocalActor"
+      		sender ! "START"
     case msg : String=>
       		println(s"LocalActor received message:'$msg'");
       		if(counter<5){
       			sender ! "Hello back to you"
       			counter += 1
       		}
-    case Start(z) =>
-	    {
-	      for(i<- 0 to 10000000)
-	      {
-	    	  var flag = true
-	    	  val input = BearerTokenGenerator.getToken()
-	    	  val hashOutput = BearerTokenGenerator.generateSHAToken(input)
-	    	  if (Common.isBitCoin(hashOutput,z))
-	    		  println("bitcoin:"+input+"\thash:"+ hashOutput)
-	      }
-	      
-	    }		
+//    case start : Int =>
+//	    {
+//	      for(i<- 0 to 10000000)
+//	      {
+//	    	  var flag = true
+//	    	  val input = BearerTokenGenerator.getToken()
+//	    	  val hashOutput = BearerTokenGenerator.generateSHAToken(input)
+//	    	  if (Common.isBitCoin(hashOutput,z))
+//	    		  println("bitcoin:"+input+"\thash:"+ hashOutput)
+//	      }
+//	      
+//	    }		
   }
   
   
   
 }
 
-class RemoteMiningActor(ip: String) extends Actor{
-  
-  
-  val remote = context.actorSelection("akka.tcp://MasterSystem@"+ip+":2552/user/RemoteMiningActor")
-  var counter=0
-  def receive ={
-    case "START" =>
-      		remote ! "Hello from LocalActor"
-    case msg : String=>
-      		println(s"LocalActor received message:'$msg'");
-      		if(counter<5){
-      			sender ! "Hello back to you"
-      			counter += 1
-      		}
-    case Start(z) =>
-	    {
-	      for(i<- 0 to 10000000)
-	      {
-	    	  var flag = true
-	    	  val input = BearerTokenGenerator.getToken()
-	    	  val hashOutput = BearerTokenGenerator.generateSHAToken(input)
-	    	  if (Common.isBitCoin(hashOutput,z))
-	    		  println("bitcoin:"+input+"\thash:"+ hashOutput)
-	      }
-	      
-	    }		
-  }
-
-}
