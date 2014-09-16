@@ -20,20 +20,19 @@ object BitCoinMaster{
     val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/MiningActor"
    if(remoteHostPort == "127.0.0.1:2552"){
   val system = ActorSystem("MasterSystem", ConfigFactory.load("Master.conf"))
-  system.actorOf(BitCoinMaster.props(remotePath, zeroesExpected, remoteHostPort), "snd")
+  system.actorOf(BitCoinMaster.mprops(remotePath, zeroesExpected, remoteHostPort), "snd")
    }
    else{
      val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))
-     system.actorOf(BitCoinMaster.props(remotePath, zeroesExpected, remoteHostPort), "snd")
+     system.actorOf(BitCoinMaster.sprops(remotePath, zeroesExpected, remoteHostPort), "snd")
    }
-  
-
-  
    
    }
 
-  def props(path: String, zeroesExpected: Int, remoteHostPort: String): Props =
-    Props(new BitCoinMaster(path, zeroesExpected, remoteHostPort))
+  def mprops(path: String, zeroesExpected: Int, remoteHostPort: String): Props =
+    Props(classOf[MBitCoin],path, zeroesExpected, remoteHostPort)
+  def sprops(path: String, zeroesExpected: Int, remoteHostPort: String): Props =
+    Props(classOf[SBitCoin],path, zeroesExpected, remoteHostPort)
    
 }
   
@@ -52,7 +51,7 @@ object BitCoinMaster{
 		*/
 
 
-class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String) extends Actor {
+class MBitCoin(path: String, zeroesExpected: Int, remoteHostPort:String) extends Actor {
 
    
   def receive={
@@ -60,7 +59,7 @@ class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String) ex
      		println("Hello from MiningActor")
   }
     //Create a actor system
-    //val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))    
+    val systemTest = ActorSystem("System", ConfigFactory.load("Local.conf"))    
     
   	if(remoteHostPort == "127.0.0.1:2552")
 		{
@@ -78,16 +77,66 @@ class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String) ex
   	  //val remote = context.actorSelection(path)
 		//	remote ! "START"
   	  
+  		println("Local")
+  		println("Trying just remote")
+  		println(path)
+		//val remote = context.actorSelection(s"akka.tcp://MasterSystem@10.136.14.46:2552/user/Mining")
+		//remote ! "START"
+  	  
+		}
+//  		else{
+//  		  println("Trying just remote")
+//  		  println(path)
+//		  val remote = context.actorSelection(path)
+//		  remote ! "START"
+//  		}
+			    
+    		//self! "RECEIVE"
+}
+
+class SBitCoin(path: String, zeroesExpected: Int, remoteHostPort:String) extends Actor {
+
+   
+  def receive={
+    case "RECEIVE" =>
+     		println("Hello from MiningActor")
+  }
+    //Create a actor system
+    //val systemTest = ActorSystem("System", ConfigFactory.load("Local.conf"))    
+    
+  	if(remoteHostPort != "127.0.0.1:2552")
+		{
+  	  /*
+			val processors = Runtime.getRuntime().availableProcessors()+4
+			
+			for(i<- 0 to processors){
+			  val actorName="MiningActor"+i.toString()
+			  var actor = system.actorOf(Props[MiningActor], name = actorName)
+			  actor! start(zeroesExpected)
+			  
+			}
+			*/
+  	  //println("Trying just remote")
+  	  //val remote = context.actorSelection(path)
+		//	remote ! "START"
+  	  
+  		
+  		println("Trying just remote")
+  		println(path)
+		val remote = context.actorSelection(s"akka.tcp://MasterSystem@10.136.14.46:2552/user/Mining")
+		remote ! "START"
   	  
 		}
   		else{
   		  println("Trying just remote")
-			val remote = context.actorSelection(path)
-			remote ! "START"
+  		  println(path)
+		  val remote = context.actorSelection(path)
+		  remote ! "START"
   		}
 			    
     		//self! "RECEIVE"
 }
+
 
 class MiningActor extends Actor{
   //val remote = context.actorSelection("akka.tcp://MasterSystem@"+ip+":2552/user/RemoteMiningActor")
