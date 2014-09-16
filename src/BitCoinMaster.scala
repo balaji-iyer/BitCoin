@@ -18,11 +18,22 @@ object BitCoinMaster{
   val zeroesExpected = args(0).toInt
   val remoteHostPort = if (args.length >= 2) args(1) else "127.0.0.1:2552"
     
-  val system = ActorSystem("MasterSystem", ConfigFactory.load("Master.conf"))    	
-  val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/MiningActor"
 
+  if(remoteHostPort == "127.0.0.1:2552"){
+    val system = ActorSystem("MasterSystem", ConfigFactory.load("Master.conf"))
+    	val MiningActor1 = system.actorOf(Props[MiningActor], name = "MiningActor1")
+    	MiningActor1 ! start(zeroesExpected)
+    
+  }
   
-   system.actorOf(BitCoinMaster.props(remotePath, zeroesExpected, remoteHostPort), "snd")
+  else{
+    val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))
+    val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/MiningActor"
+    val remote = system.actorSelection(remotePath)
+			remote ! "START"
+  }
+  
+   //system.actorOf(BitCoinMaster.props(remotePath, zeroesExpected, remoteHostPort), "snd")
    }
 
   def props(path: String, zeroesExpected: Int, remoteHostPort: String): Props =
@@ -67,7 +78,8 @@ class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String) ex
 			  
 			}
 			*/
-  	  
+  	  val remote = system.actorSelection(path)
+			remote ! "START"
   	  println("Trying just remote")
   	  
 		}
