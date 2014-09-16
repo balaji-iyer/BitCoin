@@ -59,7 +59,7 @@ class MBitCoin(path: String, zeroesExpected: Int, remoteHostPort:String) extends
      		println("Hello from MiningActor")
   }
     //Create a actor system
-    val systemTest = ActorSystem("System", ConfigFactory.load("Local.conf"))    
+    //val systemTest = ActorSystem("System", ConfigFactory.load("Local.conf"))    
     
   	if(remoteHostPort == "127.0.0.1:2552")
 		{
