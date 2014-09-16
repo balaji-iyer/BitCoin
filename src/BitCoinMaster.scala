@@ -17,23 +17,19 @@ object BitCoinMaster{
   //Accept number of zeroes and ip address arguments from command line
   val zeroesExpected = args(0).toInt
   val remoteHostPort = if (args.length >= 2) args(1) else "127.0.0.1:2552"
-    
-
-  if(remoteHostPort == "127.0.0.1:2552"){
-    val system = ActorSystem("MasterSystem", ConfigFactory.load("Master.conf"))
-    	val MiningActor1 = system.actorOf(Props[MiningActor], name = "MiningActor1")
-    	MiningActor1 ! start(zeroesExpected)
-    
-  }
-  
-  else{
-    val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))
     val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/MiningActor"
-    val remote = system.actorSelection(remotePath)
-			remote ! "START"
-  }
+   if(remoteHostPort == "127.0.0.1:2552"){
+  val system = ActorSystem("MasterSystem", ConfigFactory.load("Master.conf"))
+  system.actorOf(BitCoinMaster.props(remotePath, zeroesExpected, remoteHostPort), "snd")
+   }
+   else{
+     val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))
+     system.actorOf(BitCoinMaster.props(remotePath, zeroesExpected, remoteHostPort), "snd")
+   }
   
-   //system.actorOf(BitCoinMaster.props(remotePath, zeroesExpected, remoteHostPort), "snd")
+
+  
+   
    }
 
   def props(path: String, zeroesExpected: Int, remoteHostPort: String): Props =
@@ -64,7 +60,7 @@ class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String) ex
      		println("Hello from MiningActor")
   }
     //Create a actor system
-    val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))    
+    //val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))    
     
   	if(remoteHostPort == "127.0.0.1:2552")
 		{
@@ -78,13 +74,15 @@ class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String) ex
 			  
 			}
 			*/
-  	  val remote = system.actorSelection(path)
-			remote ! "START"
-  	  println("Trying just remote")
+  	  //println("Trying just remote")
+  	  //val remote = context.actorSelection(path)
+		//	remote ! "START"
+  	  
   	  
 		}
   		else{
-			val remote = system.actorSelection(path)
+  		  println("Trying just remote")
+			val remote = context.actorSelection(path)
 			remote ! "START"
   		}
 			    
