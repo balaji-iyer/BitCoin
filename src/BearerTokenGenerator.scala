@@ -51,6 +51,11 @@ object BearerTokenGenerator {
 	def generateSHAToken(tokenprefix: String): String =  {
 		sha(tokenprefix + System.nanoTime() + generateToken(TOKEN_LENGTH)) 
 	}
+	//getInput String
+	def getToken(tokenprefix: String): String =  {
+		return(tokenprefix + System.nanoTime() + generateToken(TOKEN_LENGTH)) 
+	}
+	
 	def generateSHA256Token(tokenprefix: String): String =  {
 		sha(tokenprefix) 
 	}
