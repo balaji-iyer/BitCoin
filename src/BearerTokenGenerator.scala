@@ -48,7 +48,7 @@ object BearerTokenGenerator {
 	def generateMD5Token(tokenprefix: String): String =  {
 		md5(tokenprefix + System.nanoTime() + generateToken(TOKEN_LENGTH)) 
 	}
-	def generateSHAToken(tokenprefix: String): String =  {
+	/*def generateSHAToken(tokenprefix: String): String =  {
 		sha(tokenprefix + System.nanoTime() + generateToken(TOKEN_LENGTH)) 
 	}
 	//getInput String
@@ -58,6 +58,14 @@ object BearerTokenGenerator {
 	
 	def generateSHA256Token(tokenprefix: String): String =  {
 		sha(tokenprefix) 
+	}
+	// final 2 methods we're using
+	def getToken(): String =  {
+		return("balajiiyer" + System.nanoTime()) 
+	}
+	
+	def generateSHAToken(shaInput :String):String ={
+	  sha(shaInput)
 	}
 }
 
