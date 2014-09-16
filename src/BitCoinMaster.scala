@@ -67,12 +67,13 @@ class BitCoinMaster(path: String, zeroesExpected: Int, remoteHostPort:String) ex
 			  
 			}
 			*/
+  	  
   	  println("Trying just remote")
+  	  
 		}
   		else{
-  	       //val MiningActor1 = system.actorOf(Props[MiningActor], name = "MiningActor1")
 			val remote = system.actorSelection(path)
-			remote ! start(zeroesExpected)
+			remote ! "START"
   		}
 			    
     		//self! "RECEIVE"
