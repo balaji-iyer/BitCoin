@@ -10,7 +10,6 @@ import com.typesafe.config.ConfigFactory
 
 case class start(zeroes :Int)
 
-case class Greeting(message: String)
 case object start1
 
 object BitCoinMaster{
@@ -23,8 +22,8 @@ object BitCoinMaster{
     val remoteHostPort = "10.136.14.46:2552"
     val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/MiningActor" 
     val system = ActorSystem("MasterSystem", ConfigFactory.load("Master.conf"))
-    //val actor=system.actorOf(Props[RemoteMiningActor],
-      //name = "RemoteMiningActor")
+    val actor=system.actorOf(Props[MiningActor],
+     name = "MiningActor")
      //actor!"START"
    
   //system.actorOf(BitCoinMaster.mprops(remotePath, zeroesExpected, remoteHostPort), "MiningActor")
@@ -33,6 +32,7 @@ object BitCoinMaster{
      val remoteHostPort = "10.136.14.46:2552"
      val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/RemoteMiningActor"
      val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))
+     
      val actor=system.actorOf(Props[RemoteMiningActor],
       name = "RemoteMiningActor")
      actor!"START"
@@ -154,15 +154,15 @@ class MiningActor extends Actor{
   //val remote = context.actorSelection("akka.tcp://MasterSystem@"+ip+":2552/user/RemoteMiningActor")
   var counter=0
   def receive ={
-    case start1 =>
-      		println("Abi hoja")
+    case "start1" =>
+      		println("Remote pinged me")
     case msg : String=>
       		println(s"LocalActor received message:'$msg'");
       		if(counter<5){
       			sender ! "Hello back to you"
       			counter += 1
       		}
-    case start(z) =>
+    case z : Int =>
 	    {
 	      for(i<- 0 to 10000000)
 	      {
@@ -184,7 +184,7 @@ class MiningActor extends Actor{
   def receive ={
     case "START" =>
       		println("Abe hoja")
-      		remote ! start1
+      		remote ! "start1"
     case msg : String=>
       		println(s"LocalActor received message:'$msg'");
       		if(counter<5){
