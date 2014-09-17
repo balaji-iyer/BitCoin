@@ -11,22 +11,34 @@ import com.typesafe.config.ConfigFactory
 case class start(zeroes :Int)
 
 case class Greeting(message: String)
+case object start1
 
 object BitCoinMaster{
    def main(args: Array[String]): Unit = { 
   //Accept number of zeroes and ip address arguments from command line
   val zeroesExpected = args(0).toInt
   val remoteHostPort = if (args.length >= 2) args(1) else "127.0.0.1:2552"
-    val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/MiningActor"
+    
    if(remoteHostPort == "127.0.0.1:2552"){
-  val system = ActorSystem("MasterSystem", ConfigFactory.load("Master.conf"))
-  system.actorOf(BitCoinMaster.mprops(remotePath, zeroesExpected, remoteHostPort), "snd")
+    val remoteHostPort = "10.136.14.46:2552"
+    val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/MiningActor" 
+    val system = ActorSystem("MasterSystem", ConfigFactory.load("Master.conf"))
+    //val actor=system.actorOf(Props[RemoteMiningActor],
+      //name = "RemoteMiningActor")
+     //actor!"START"
+   
+  //system.actorOf(BitCoinMaster.mprops(remotePath, zeroesExpected, remoteHostPort), "MiningActor")
    }
    else{
+     val remoteHostPort = "10.136.14.46:2552"
+     val remotePath = s"akka.tcp://MasterSystem@$remoteHostPort/user/RemoteMiningActor"
      val system = ActorSystem("LocalSystem", ConfigFactory.load("Local.conf"))
-     system.actorOf(BitCoinMaster.sprops(remotePath, zeroesExpected, remoteHostPort), "snd")
+     val actor=system.actorOf(Props[RemoteMiningActor],
+      name = "RemoteMiningActor")
+     actor!"START"
+     //system.actorOf(BitCoinMaster.sprops(remotePath, zeroesExpected, remoteHostPort), "RemoteMiningActor")
    }
-   
+   Thread.sleep(100000)
    }
 
   def mprops(path: String, zeroesExpected: Int, remoteHostPort: String): Props =
@@ -79,7 +91,7 @@ class MBitCoin(path: String, zeroesExpected: Int, remoteHostPort:String) extends
   	  
   		println("Local")
 //  		println("Trying just remote")
-//  		println(path)
+  		println(path)
 		//val remote = context.actorSelection(s"akka.tcp://MasterSystem@10.136.14.46:2552/user/Mining")
 		//remote ! "START"
   	  
@@ -123,7 +135,7 @@ class SBitCoin(path: String, zeroesExpected: Int, remoteHostPort:String) extends
   		
   		println("Trying just remote")
   		println(path)
-		val remote = context.actorSelection(s"akka.tcp://MasterSystem@10.136.14.46:2552/user/RemoteMiningActor")
+		val remote = context.actorSelection(path)
 		remote ! "START"
   	  
 		}
@@ -142,8 +154,8 @@ class MiningActor extends Actor{
   //val remote = context.actorSelection("akka.tcp://MasterSystem@"+ip+":2552/user/RemoteMiningActor")
   var counter=0
   def receive ={
-    case "START" =>
-      		println("Abe hoja")
+    case start1 =>
+      		println("Abi hoja")
     case msg : String=>
       		println(s"LocalActor received message:'$msg'");
       		if(counter<5){
@@ -166,11 +178,13 @@ class MiningActor extends Actor{
 }
   
  class RemoteMiningActor extends Actor{
-  //val remote = context.actorSelection("akka.tcp://MasterSystem@"+ip+":2552/user/RemoteMiningActor")
+   
+  val remote = context.actorSelection("akka.tcp://MasterSystem@10.136.14.46:2552/user/MiningActor")
   var counter=0
   def receive ={
     case "START" =>
       		println("Abe hoja")
+      		remote ! start1
     case msg : String=>
       		println(s"LocalActor received message:'$msg'");
       		if(counter<5){
