@@ -29,7 +29,7 @@ case object getNoOfZeroes
 case object sendActorCount
 case object actorcount
 
-object BitCoinMaster{
+object project1{
    def main(args: Array[String]): Unit = { 
   //Accept number of zeroes and ip address arguments from command line
   

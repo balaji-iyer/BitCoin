@@ -1,6 +1,11 @@
 BitCoin
 =======
-The goal is mine bitcoins using akka actor model so that it runs well on multiple core machines.
+The goal is to mine bitcoins using akka actor model so that it runs well on multiple core machines.
+
+Team members:
+=======
+Garima Singh (UFID : 5197-5877)
+Balaji Iyer  (UFID : 0443-5000)
 
 Prerequisites:
 =======
@@ -40,7 +45,6 @@ Observations:
 	Throughtput is 26.221078732160073 messages/sec
 	2000.01user 26.43system 5:04.64elapsed 665%CPU (0avgtext+0avgdata 243052maxresident)k
 	0inputs+608outputs (0major+93682minor)pagefaults 0swaps
-
 
 
 
