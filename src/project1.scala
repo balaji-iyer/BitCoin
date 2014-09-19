@@ -90,6 +90,7 @@ var actorCount=0
 var totalDuration: Long=0
 var actorNo=0
 var bitcoinCount=0
+var testDuration: Int=300
 
 def receive={
 case `interrupt` =>
@@ -125,7 +126,7 @@ case `interrupt` =>
       				    println(s"Total Number of bitcoins mined is $bitcoinCount")
       				    println(s"Total number of messages processed is $totalMessages")
       				    //println(totalDuration)
-      				    val throughtput = (totalMessages * 1000.0 / TimeUnit.MILLISECONDS.toSeconds(totalDuration))
+      				    val throughtput = (totalMessages / testDuration)
       				    println(s"Throughtput is $throughtput messages/sec")
       				    context.system.shutdown()
       				  }
